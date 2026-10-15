@@ -1,6 +1,4 @@
-"""
-Pruebas para el generador parametrizado y el motor adaptativo de práctica.
-"""
+"Tests for the parameterized generator and adaptive practice engine."
 
 import pytest
 from mathtutor.practice.generator import ExerciseGenerator
@@ -30,18 +28,18 @@ def test_adaptive_insufficient_data():
     controller = AdaptiveController(storage)
     summary = controller.get_progress_summary("algebra_lineal")
     assert not summary["has_enough_data"]
-    assert "Aún no hay suficientes ejercicios" in summary["message"]
+    assert "There are not enough exercises" in summary["message"]
 
 
 def test_adaptive_promotion_block():
     storage = StorageManager(":memory:")
     controller = AdaptiveController(storage)
 
-    # Nivel inicial: 1
+    # Initial level: 1
     prog = storage.get_topic_progress("algebra_lineal")
     assert prog["current_level"] == 1
 
-    # 4 aciertos sin pistas
+    # Four correct answers without hints
     for i in range(4):
         res = controller.process_attempt(StudentAttempt(
             topic="algebra_lineal",
@@ -52,7 +50,7 @@ def test_adaptive_promotion_block():
         ))
         assert not res["level_changed"]
 
-    # 5to intento (acierto sin pistas) -> Se completa el bloque de 5 con 5/5 -> Sube a nivel 2
+    # Fifth unassisted correct answer completes a 5/5 block and raises the level to 2
     res = controller.process_attempt(StudentAttempt(
         topic="algebra_lineal",
         difficulty_level=1,
@@ -62,25 +60,25 @@ def test_adaptive_promotion_block():
     ))
     assert res["level_changed"]
     assert res["new_level"] == 2
-    assert "subido al nivel 2" in res["action_message"]
+    assert "moved up to level 2" in res["action_message"]
 
 
 def test_adaptive_assisted_attempts_ignored_for_block():
     storage = StorageManager(":memory:")
     controller = AdaptiveController(storage)
 
-    # 5 intentos pero con pistas usadas
+    # Five attempts using hints
     for i in range(5):
         res = controller.process_attempt(StudentAttempt(
             topic="algebra_lineal",
             difficulty_level=1,
             user_answer="correct",
             is_correct=True,
-            hints_used=1  # Con asistencia
+            hints_used=1  # Assisted
         ))
         assert not res["level_changed"]
 
-    # El nivel no debe haber cambiado
+    # The level should remain unchanged
     prog = storage.get_topic_progress("algebra_lineal")
     assert prog["current_level"] == 1
     assert prog["consecutive_unassisted"] == 0

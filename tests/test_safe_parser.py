@@ -1,6 +1,4 @@
-"""
-Pruebas para el Safe Parser de MathTutor AI.
-"""
+"Tests for MathTutor AI's restricted expression parser."
 
 import pytest
 import sympy as sp
@@ -40,7 +38,7 @@ def test_safe_parser_implicit_multiplication():
 
 
 def test_safe_parser_security_rejections():
-    # Intento de inyección de código / ejecución
+    # Code injection / execution attempts
     with pytest.raises(SafeParserError):
         parse_expression("__import__('os').system('dir')")
 
@@ -61,10 +59,10 @@ def test_safe_parser_security_rejections():
 
 
 def test_safe_parser_limits():
-    # Exponente excesivo
+    # Excessive exponent
     with pytest.raises(SafeParserError):
         parse_expression("x^100")
 
-    # Múltiples incógnitas rechazadas en parse_equation
+    # parse_equation rejects multiple unknowns
     with pytest.raises(SafeParserError):
         parse_equation("2x + 3y = 10")

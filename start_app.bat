@@ -2,11 +2,11 @@
 setlocal
 cd /d "%~dp0"
 echo ========================================================
-echo         Iniciando MathTutor AI (Modo Desarrollo)
+echo         Starting MathTutor AI (Development Mode)
 echo ========================================================
 echo.
 if not exist ".venv\Scripts\python.exe" (
-    echo [ERROR] No se encontro el entorno virtual en .venv
+    echo [ERROR] The virtual environment was not found in .venv
     pause
     exit /b 1
 )

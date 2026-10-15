@@ -1,11 +1,4 @@
-"""
-Controlador pedagógico adaptativo de práctica para MathTutor AI.
-Implementa la heurística de bloques de 5 ejercicios no asistidos (sin pistas):
-- 4 o 5 aciertos: sube un nivel (máximo 3).
-- 3 aciertos: mantiene el nivel.
-- 0, 1 o 2 aciertos: baja un nivel (mínimo 1).
-Los intentos asistidos (con pistas) se registran pero no computan para la ventana de ajuste.
-"""
+"Adaptive practice controller for MathTutor AI.\nEvaluates blocks of five unassisted exercises: 4–5 correct raises the level, 3 keeps it, and 0–2 lowers it (levels 1–3).\nAssisted attempts are recorded but excluded from the adjustment window."
 
 from typing import Dict, Any, List, Tuple
 from ..storage.database import StorageManager
@@ -19,10 +12,7 @@ class AdaptiveController:
         self.storage = storage
 
     def process_attempt(self, attempt: StudentAttempt) -> Dict[str, Any]:
-        """
-        Registra el intento en SQLite y evalúa si se completó un bloque de 5
-        ejercicios sin asistencia para ajustar el nivel de dificultad del tema.
-        """
+        "Record an attempt in SQLite and adjust the topic's difficulty after a block of five unassisted exercises."
         self.storage.record_attempt(attempt)
         topic = attempt.topic
 
@@ -36,14 +26,14 @@ class AdaptiveController:
         old_level = current_level
         action_message = ""
 
-        # Solo ejercicios no asistidos (0 pistas usadas) cuentan para la adaptación
+        # Only unassisted attempts (no hints) count toward adaptation
         if attempt.hints_used == 0:
             history_window.append(attempt.is_correct)
 
-            # Verificar si se completó un bloque de 5
+            # Check whether a block of five is complete
             if len(history_window) >= self.BLOCK_SIZE:
                 block = history_window[:self.BLOCK_SIZE]
-                history_window = history_window[self.BLOCK_SIZE:]  # Vaciar el bloque evaluado
+                history_window = history_window[self.BLOCK_SIZE:]  # Clear the evaluated block
 
                 correct_count = sum(1 for x in block if x)
 
@@ -51,20 +41,20 @@ class AdaptiveController:
                     if current_level < 3:
                         current_level += 1
                         level_changed = True
-                        action_message = f"¡Gran trabajo! Has acertado {correct_count}/5 ejercicios independientes. Has subido al nivel {current_level}."
+                        action_message = f"Great work! You answered {correct_count}/5 unassisted exercises correctly. You moved up to level {current_level}."
                     else:
-                        action_message = f"¡Excelente desempeño! {correct_count}/5 aciertos. Ya estás en el nivel máximo ({current_level})."
+                        action_message = f"Excellent work! {correct_count}/5 correct. You are already at the highest level ({current_level})."
                 elif correct_count == 3:
-                    action_message = f"Buen desempeño ({correct_count}/5 aciertos). Mantienes el nivel {current_level} para afianzar conceptos."
+                    action_message = f"Good work ({correct_count}/5 correct). Stay at level {current_level} to reinforce these concepts."
                 else:
                     if current_level > 1:
                         current_level -= 1
                         level_changed = True
-                        action_message = f"Se detectaron dificultades ({correct_count}/5 aciertos). Ajustamos la dificultad al nivel {current_level} para reforzar la base."
+                        action_message = f"Some difficulty detected ({correct_count}/5 correct). The difficulty has been adjusted to level {current_level} to strengthen the fundamentals."
                     else:
-                        action_message = f"Se registraron {correct_count}/5 aciertos. Sigues en el nivel 1 practicando los fundamentos."
+                        action_message = f"You answered {correct_count}/5 correctly. Continue practicing the fundamentals at level 1."
 
-        # Guardar progreso actualizado
+        # Save updated progress
         self.storage.save_topic_progress(
             topic=topic,
             current_level=current_level,
@@ -84,13 +74,13 @@ class AdaptiveController:
         }
 
     def get_progress_summary(self, topic: str) -> Dict[str, Any]:
-        """Retorna el resumen pedagógico del tema o mensaje si los datos son insuficientes."""
+        "Return a learning summary for the topic, or an insufficient-data message."
         progress = self.storage.get_topic_progress(topic)
         total = progress["total_attempts"]
         if total < 3:
             return {
                 "has_enough_data": False,
-                "message": "Aún no hay suficientes ejercicios para valorar tu progreso en este tema.",
+                "message": "There are not enough exercises yet to assess your progress in this topic.",
                 "current_level": progress["current_level"],
                 "total_attempts": total,
                 "total_correct": progress["total_correct"]
@@ -103,5 +93,5 @@ class AdaptiveController:
             "total_attempts": total,
             "total_correct": progress["total_correct"],
             "percentage": round(pct, 1),
-            "unassisted_progress": f"{progress['consecutive_unassisted']}/{self.BLOCK_SIZE} del bloque actual"
+            "unassisted_progress": f"{progress['consecutive_unassisted']}/{self.BLOCK_SIZE} in the current block"
         }

@@ -1,7 +1,4 @@
-"""
-Almacenamiento persistente SQLite para MathTutor AI.
-Ubicación predeterminada: %LOCALAPPDATA%/MathTutorAI/mathtutor.db
-"""
+"Persistent SQLite storage for MathTutor AI.\nDefault location: %LOCALAPPDATA%/MathTutorAI/mathtutor.db"
 
 import os
 import json
@@ -74,7 +71,7 @@ class StorageManager:
 
     def _migrate_v1(self, conn: sqlite3.Connection):
         cursor = conn.cursor()
-        # Perfiles
+        # Profiles
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS profiles (
                 id TEXT PRIMARY KEY,
@@ -83,15 +80,12 @@ class StorageManager:
                 preferences_json TEXT
             )
         """)
-        # Insertar perfil inicial 'Estudiante' si no existe
+        # Insert the initial Student profile if it does not exist
         cursor.execute("SELECT id FROM profiles WHERE id = 'default_student'")
         if not cursor.fetchone():
-            cursor.execute("""
-                INSERT INTO profiles (id, name, preferences_json)
-                VALUES ('default_student', 'Estudiante', '{}')
-            """)
+            cursor.execute("\n                INSERT INTO profiles (id, name, preferences_json)\n                VALUES ('default_student', 'Student', '{}')\n            ")
 
-        # Historial de resoluciones
+        # Solution history
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS history (
                 id TEXT PRIMARY KEY,
@@ -109,7 +103,7 @@ class StorageManager:
             )
         """)
 
-        # Intentos de práctica
+        # Practice attempts
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS attempts (
                 id TEXT PRIMARY KEY,
@@ -125,7 +119,7 @@ class StorageManager:
             )
         """)
 
-        # Progreso adaptativo por tema
+        # Adaptive progress by topic
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS topic_progress (
                 topic TEXT PRIMARY KEY,
@@ -138,7 +132,7 @@ class StorageManager:
             )
         """)
 
-    # --- Operaciones de Perfil ---
+    # --- Profile operations ---
     def get_profile(self, profile_id: str = "default_student") -> UserProfile:
         with self._get_connection() as conn:
             cursor = conn.cursor()
@@ -152,10 +146,10 @@ class StorageManager:
                     preferences=prefs
                 )
             # Default fallback
-            return UserProfile(id=profile_id, name="Estudiante")
+            return UserProfile(id=profile_id, name="Student")
 
     def update_profile_name(self, name: str, profile_id: str = "default_student") -> None:
-        clean_name = name.strip() or "Estudiante"
+        clean_name = name.strip() or "Student"
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
@@ -165,7 +159,7 @@ class StorageManager:
             """, (profile_id, clean_name))
             conn.commit()
 
-    # --- Operaciones de Historial ---
+    # --- History operations ---
     def save_solution(self, sol: SolutionResult) -> str:
         with self._get_connection() as conn:
             cursor = conn.cursor()
@@ -252,7 +246,7 @@ class StorageManager:
             cursor.execute("DELETE FROM history")
             conn.commit()
 
-    # --- Operaciones de Práctica y Progreso ---
+    # --- Practice and progress operations ---
     def record_attempt(self, attempt: StudentAttempt) -> None:
         with self._get_connection() as conn:
             cursor = conn.cursor()

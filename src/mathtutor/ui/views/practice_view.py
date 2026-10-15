@@ -1,8 +1,4 @@
-"""
-Vista de Práctica Adaptada (PracticeView).
-Permite resolver ejercicios generados con parámetros reproducibles,
-gestiona pistas, nivel de dificultad y retroalimentación respetuosa inmediata.
-"""
+"Adaptive practice view.\nGenerates reproducible exercises and manages hints, difficulty, and immediate feedback."
 
 from typing import Optional
 from PySide6.QtWidgets import (
@@ -32,37 +28,37 @@ class PracticeView(QWidget):
         layout.setContentsMargins(24, 24, 24, 24)
         layout.setSpacing(14)
 
-        header = QLabel("Práctica de ejercicios adaptada")
+        header = QLabel("Adaptive Exercise Practice")
         header.setStyleSheet("font-size: 20px; font-weight: bold; color: #0f172a;")
         layout.addWidget(header)
 
-        # Barra de selección de Tema y Nivel
+        # Topic and difficulty selection
         controls_frame = QFrame()
         controls_frame.setStyleSheet("background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;")
         c_layout = QHBoxLayout(controls_frame)
         c_layout.setSpacing(12)
 
-        c_layout.addWidget(QLabel("Materia / Tema:"))
+        c_layout.addWidget(QLabel("Subject / Topic:"))
         self.topic_combo = QComboBox()
-        self.topic_combo.addItem("Álgebra Lineal", "algebra_lineal")
-        self.topic_combo.addItem("Álgebra Cuadrática", "algebra_cuadratica")
-        self.topic_combo.addItem("Geometría", "geometria")
-        self.topic_combo.addItem("Física", "fisica")
-        self.topic_combo.addItem("Cálculo", "calculo")
+        self.topic_combo.addItem("Linear Equations", "algebra_lineal")
+        self.topic_combo.addItem("Quadratic Equations", "algebra_cuadratica")
+        self.topic_combo.addItem("Geometry", "geometria")
+        self.topic_combo.addItem("Physics", "fisica")
+        self.topic_combo.addItem("Calculus", "calculo")
         self.topic_combo.currentIndexChanged.connect(self._on_topic_changed)
         c_layout.addWidget(self.topic_combo)
 
-        c_layout.addWidget(QLabel("Dificultad:"))
+        c_layout.addWidget(QLabel("Difficulty:"))
         self.level_combo = QComboBox()
-        self.level_combo.addItem("Nivel 1 (Básico)", 1)
-        self.level_combo.addItem("Nivel 2 (Intermedio)", 2)
-        self.level_combo.addItem("Nivel 3 (Avanzado)", 3)
+        self.level_combo.addItem("Level 1 (Basic)", 1)
+        self.level_combo.addItem("Level 2 (Intermediate)", 2)
+        self.level_combo.addItem("Level 3 (Advanced)", 3)
         self.level_combo.currentIndexChanged.connect(self.new_exercise)
         c_layout.addWidget(self.level_combo)
 
         c_layout.addStretch()
 
-        self.btn_new = QPushButton("Generar nuevo ejercicio ↻")
+        self.btn_new = QPushButton("Generate New Exercise ↻")
         self.btn_new.setStyleSheet("""
             QPushButton {
                 background-color: #f1f5f9;
@@ -79,15 +75,15 @@ class PracticeView(QWidget):
 
         layout.addWidget(controls_frame)
 
-        # Panel del Ejercicio
+        # Exercise panel
         exercise_frame = QFrame()
         exercise_frame.setStyleSheet("background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px;")
         e_layout = QVBoxLayout(exercise_frame)
         e_layout.setSpacing(12)
 
-        # Indicador de nivel y bloque
+        # Level and block indicators
         info_header = QHBoxLayout()
-        self.lbl_level_badge = QLabel("Nivel 1")
+        self.lbl_level_badge = QLabel("Level 1")
         self.lbl_level_badge.setStyleSheet("""
             background-color: #dbeafe;
             color: #1e40af;
@@ -98,24 +94,24 @@ class PracticeView(QWidget):
         """)
         info_header.addWidget(self.lbl_level_badge)
 
-        self.lbl_block_info = QLabel("Bloque adaptativo: 0/5 ejercicios sin pistas")
+        self.lbl_block_info = QLabel("Adaptive block: 0/5 exercises without hints")
         self.lbl_block_info.setStyleSheet("color: #64748b; font-size: 12px;")
         info_header.addWidget(self.lbl_block_info)
         info_header.addStretch()
         e_layout.addLayout(info_header)
 
-        # Enunciado de la pregunta
-        self.lbl_statement = QLabel("Cargando ejercicio...")
+        # Question statement
+        self.lbl_statement = QLabel("Loading exercise...")
         self.lbl_statement.setWordWrap(True)
         self.lbl_statement.setStyleSheet("font-size: 17px; font-weight: bold; color: #0f172a; margin: 8px 0;")
         e_layout.addWidget(self.lbl_statement)
 
-        # Campo de respuesta del estudiante
+        # Student answer field
         ans_layout = QHBoxLayout()
         ans_layout.setSpacing(8)
 
         self.ans_input = QLineEdit()
-        self.ans_input.setPlaceholderText("Escribe tu respuesta aquí...")
+        self.ans_input.setPlaceholderText("Type your answer here...")
         self.ans_input.setStyleSheet("""
             QLineEdit {
                 background-color: #ffffff;
@@ -130,7 +126,7 @@ class PracticeView(QWidget):
         self.ans_input.returnPressed.connect(self.check_answer)
         ans_layout.addWidget(self.ans_input, stretch=1)
 
-        self.btn_submit = QPushButton("Comprobar respuesta")
+        self.btn_submit = QPushButton("Check Answer")
         self.btn_submit.setStyleSheet("""
             QPushButton {
                 background-color: #2563eb;
@@ -145,7 +141,7 @@ class PracticeView(QWidget):
         self.btn_submit.clicked.connect(self.check_answer)
         ans_layout.addWidget(self.btn_submit)
 
-        self.btn_hint = QPushButton("Dame una pista 💡")
+        self.btn_hint = QPushButton("Give Me a Hint 💡")
         self.btn_hint.setStyleSheet("""
             QPushButton {
                 background-color: #fef3c7;
@@ -163,14 +159,14 @@ class PracticeView(QWidget):
 
         e_layout.addLayout(ans_layout)
 
-        # Zona de Pistas (Desplegable)
+        # Expandable hint area
         self.hint_box = QLabel("")
         self.hint_box.setWordWrap(True)
         self.hint_box.setStyleSheet("background-color: #fffbeb; border: 1px solid #fef3c7; color: #92400e; padding: 10px; border-radius: 6px; font-size: 13px;")
         self.hint_box.hide()
         e_layout.addWidget(self.hint_box)
 
-        # Zona de Retroalimentación
+        # Feedback area
         self.feedback_box = QLabel("")
         self.feedback_box.setWordWrap(True)
         self.feedback_box.setStyleSheet("padding: 12px; border-radius: 6px; font-size: 14px;")
@@ -201,17 +197,17 @@ class PracticeView(QWidget):
         self.current_hint_idx = 0
 
         self.lbl_statement.setText(self.current_exercise.statement)
-        self.lbl_level_badge.setText(f"Nivel {level}")
+        self.lbl_level_badge.setText(f"Level {level}")
         self.ans_input.clear()
         self.ans_input.setEnabled(True)
         self.btn_submit.setEnabled(True)
         self.hint_box.hide()
         self.feedback_box.hide()
 
-        # Actualizar indicador de bloque
+        # Update the block indicator
         prog = self.storage.get_topic_progress(topic)
         count_unassisted = prog["consecutive_unassisted"]
-        self.lbl_block_info.setText(f"Bloque adaptativo: {count_unassisted}/5 ejercicios sin pistas")
+        self.lbl_block_info.setText(f"Adaptive block: {count_unassisted}/5 exercises without hints")
 
     def request_hint(self):
         if not self.current_exercise or not self.current_exercise.hints:
@@ -223,10 +219,10 @@ class PracticeView(QWidget):
             self.current_hint_idx += 1
             self.hints_used_count += 1
 
-            self.hint_box.setText(f"💡 Pista {self.current_hint_idx}/{total_hints}:\n{hint_text}")
+            self.hint_box.setText(f"💡 Hint {self.current_hint_idx}/{total_hints}:\n{hint_text}")
             self.hint_box.show()
         else:
-            QMessageBox.information(self, "Pistas agotadas", "Ya se han mostrado todas las pistas para este ejercicio.")
+            QMessageBox.information(self, "No More Hints", "All hints for this exercise have already been shown.")
 
     def check_answer(self):
         if not self.current_exercise:
@@ -236,14 +232,14 @@ class PracticeView(QWidget):
         if not user_ans:
             return
 
-        # Comparación normalizada
+        # Normalized comparison
         correct = False
         for acc in self.current_exercise.acceptable_answers:
             if user_ans == acc.strip().lower():
                 correct = True
                 break
 
-        # Procesar con el controlador adaptativo
+        # Process with the adaptive controller
         attempt = StudentAttempt(
             exercise_id=self.current_exercise.exercise_id,
             topic=self.current_exercise.topic,
@@ -260,15 +256,15 @@ class PracticeView(QWidget):
         self.btn_submit.setEnabled(False)
 
         if correct:
-            fb = f"✓ ¡Excelente respuesta! Es correcta.\n\nExplicación: {self.current_exercise.explanation}"
+            fb = f"✓ Great answer! That is correct.\n\nExplanation: {self.current_exercise.explanation}"
             if res["level_changed"] or res["action_message"]:
                 fb += f"\n\n{res['action_message']}"
             self.feedback_box.setStyleSheet("background-color: #dcfce7; color: #166534; padding: 12px; border-radius: 6px; font-size: 14px;")
         else:
             fb = (
-                f"✗ Respuesta incorrecta.\n"
-                f"Tu respuesta: '{user_ans}'  |  Respuesta esperada: '{self.current_exercise.correct_answer}'.\n\n"
-                f"Explicación didáctica: {self.current_exercise.explanation}"
+                f"✗ Incorrect answer.\n"
+                f"Your answer: '{user_ans}'  |  Expected answer: '{self.current_exercise.correct_answer}'.\n\n"
+                f"Explanation: {self.current_exercise.explanation}"
             )
             if res["level_changed"] or res["action_message"]:
                 fb += f"\n\n{res['action_message']}"
@@ -277,7 +273,7 @@ class PracticeView(QWidget):
         self.feedback_box.setText(fb)
         self.feedback_box.show()
 
-        # Si el nivel cambió automáticamente, actualizar combo de nivel
+        # Update the difficulty selector if the level changed automatically
         if res["level_changed"]:
             idx = self.level_combo.findData(res["new_level"])
             if idx >= 0:
@@ -285,4 +281,4 @@ class PracticeView(QWidget):
                 self.level_combo.setCurrentIndex(idx)
                 self.level_combo.blockSignals(False)
 
-        self.lbl_block_info.setText(f"Bloque adaptativo: {res['unassisted_in_current_block']}/5 ejercicios sin pistas")
+        self.lbl_block_info.setText(f"Adaptive block: {res['unassisted_in_current_block']}/5 exercises without hints")

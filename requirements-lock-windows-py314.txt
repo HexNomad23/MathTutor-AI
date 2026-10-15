@@ -1,4 +1,4 @@
-# Entorno validado: Windows x64, Python 3.14.7. No incluye el proyecto editable.
+# Validated environment: Windows x64, Python 3.14.7. Excludes the editable project.
 altgraph==0.17.5
 colorama==0.4.6
 contourpy==1.4.0

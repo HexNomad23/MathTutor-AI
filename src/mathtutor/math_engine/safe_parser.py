@@ -1,8 +1,4 @@
-"""
-Analizador seguro de expresiones matemáticas (Safe Parser) para MathTutor AI.
-Garantiza que la entrada del usuario no ejecute código arbitrario, atributos o importaciones.
-Utiliza el módulo ast estándar con lista blanca de nodos y transformación a expresiones SymPy.
-"""
+"Restricted mathematical expression parser for MathTutor AI.\nUses Python's ast module with an allowlist of nodes to construct SymPy expressions.\nRejects arbitrary code, attributes, and imports."
 
 import ast
 import re
@@ -11,16 +7,16 @@ import sympy as sp
 
 
 class SafeParserError(Exception):
-    """Excepción para errores de sintaxis o seguridad en el parser."""
+    "Syntax or safety error raised by the expression parser."
     pass
 
 
-# Límite de seguridad
+# Safety limits
 MAX_EXPR_LENGTH = 300
 MAX_AST_DEPTH = 25
 MAX_EXPONENT_VAL = 20
 
-# Nodos AST estrictamente permitidos
+# Explicitly allowed AST nodes
 ALLOWED_AST_NODES = (
     ast.Expression,
     ast.BinOp,
@@ -37,54 +33,44 @@ ALLOWED_AST_NODES = (
     ast.UAdd,
 )
 
-# Nombres de variables permitidos por defecto (alfabéticos de una letra o específicos de física)
+# Default variable names: single letters and supported physics symbols
 ALLOWED_VARIABLES: Set[str] = {
     "x", "y", "z", "t", "a", "b", "c", "d", "h", "m", "v", "r", "F", "p"
 }
 
 
 def preprocess_input(expr_str: str) -> str:
-    """
-    Preprocesa la entrada del estudiante:
-    - Normaliza espacios.
-    - Soporta coma decimal cuando está entre dígitos (ej: 3,5 -> 3.5).
-    - Convierte potencias '^' a '**'.
-    - Convierte multiplicación implícita:
-      - 2x -> 2*x
-      - 3(x+1) -> 3*(x+1)
-      - (x+1)(x-2) -> (x+1)*(x-2)
-      - x(x-1) -> x*(x-1)
-    """
+    "Preprocess student input: normalize whitespace, accept decimal commas between digits, convert ^ to **, and insert explicit multiplication for 2x, 3(x+1), (x+1)(x-2), and x(x-1)."
     s = expr_str.strip()
     if not s:
-        raise SafeParserError("La expresión no puede estar vacía.")
+        raise SafeParserError("The expression cannot be empty.")
 
     if len(s) > MAX_EXPR_LENGTH:
-        raise SafeParserError(f"La expresión excede la longitud máxima permitida ({MAX_EXPR_LENGTH} caracteres).")
+        raise SafeParserError(f"The expression exceeds the maximum allowed length ({MAX_EXPR_LENGTH} characters).")
 
-    # Rechazar caracteres sospechosos de código
+    # Reject suspicious code characters
     if any(char in s for char in [";", ":", "_", "[", "]", "{", "}", "\\", "'", '"', "`", "&", "|", "$", "!", "@", "#"]):
-        raise SafeParserError("La expresión contiene caracteres no permitidos.")
+        raise SafeParserError("The expression contains unsupported characters.")
 
-    # Reemplazar coma decimal entre números (ej. 3,14 -> 3.14)
+    # Replace decimal commas between digits (e.g. 3,14 -> 3.14)
     s = re.sub(r'(\d+),(\d+)', r'\1.\2', s)
 
-    # Reemplazar potencias con ^ por **
+    # Replace ^ powers with **
     s = s.replace("^", "**")
 
-    # Multiplicación implícita: número seguido de letra (ej: 2x -> 2*x)
+    # Implicit multiplication: number followed by letter (2x -> 2*x)
     s = re.sub(r'(\d+)([a-zA-Z])', r'\1*\2', s)
 
-    # Multiplicación implícita: número seguido de paréntesis abierto (ej: 3(x+1) -> 3*(x+1))
+    # Implicit multiplication: number followed by opening parenthesis
     s = re.sub(r'(\d+)\(', r'\1*(', s)
 
-    # Multiplicación implícita: letra seguida de paréntesis abierto (ej: x(x+1) -> x*(x+1))
+    # Implicit multiplication: letter followed by opening parenthesis
     s = re.sub(r'([a-zA-Z])\(', r'\1*(', s)
 
-    # Multiplicación implícita: paréntesis cerrado seguido de paréntesis abierto (ej: (x+1)(x-2) -> (x+1)*(x-2))
+    # Implicit multiplication: closing parenthesis followed by opening parenthesis
     s = re.sub(r'\)\(', r')*(', s)
 
-    # Multiplicación implícita: paréntesis cerrado seguido de letra o número (ej: (x+1)x -> (x+1)*x)
+    # Implicit multiplication: closing parenthesis followed by a letter or number
     s = re.sub(r'\)([a-zA-Z0-9])', r')*\1', s)
 
     return s
@@ -92,31 +78,31 @@ def preprocess_input(expr_str: str) -> str:
 
 def _check_ast_safety_and_depth(node: ast.AST, depth: int = 0) -> None:
     if depth > MAX_AST_DEPTH:
-        raise SafeParserError(f"La expresión es demasiado compleja (profundidad máxima {MAX_AST_DEPTH} superada).")
+        raise SafeParserError(f"The expression is too complex (maximum depth {MAX_AST_DEPTH} exceeded).")
 
     if not isinstance(node, ALLOWED_AST_NODES):
-        raise SafeParserError(f"Operación o elemento no permitido en la expresión: {type(node).__name__}")
+        raise SafeParserError(f"Unsupported operation or element in the expression: {type(node).__name__}")
 
     if isinstance(node, ast.Name):
         if node.id not in ALLOWED_VARIABLES:
-            raise SafeParserError(f"La variable '{node.id}' no está dentro del alcance permitido.")
+            raise SafeParserError(f"The variable '{node.id}' is outside the allowed scope.")
 
     if isinstance(node, ast.Constant):
         if not isinstance(node.value, (int, float)):
-            raise SafeParserError("Solo se permiten constantes numéricas (enteros o decimales).")
+            raise SafeParserError("Only numeric constants (integers or decimals) are allowed.")
 
     if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Pow):
-        # Limitar tamaño de exponentes constantes
+        # Limit the size of constant exponents
         if isinstance(node.right, ast.Constant):
             if abs(node.right.value) > MAX_EXPONENT_VAL:
-                raise SafeParserError(f"El exponente {node.right.value} supera el límite seguro ({MAX_EXPONENT_VAL}).")
+                raise SafeParserError(f"The exponent {node.right.value} exceeds the safety limit ({MAX_EXPONENT_VAL}).")
 
     for child in ast.iter_child_nodes(node):
         _check_ast_safety_and_depth(child, depth + 1)
 
 
 def _ast_to_sympy(node: ast.AST) -> sp.Expr:
-    """Convierte de forma recursiva y segura el árbol AST verificado a un objeto SymPy."""
+    "Recursively convert a validated AST to a SymPy object."
     if isinstance(node, ast.Expression):
         return _ast_to_sympy(node.body)
 
@@ -147,58 +133,53 @@ def _ast_to_sympy(node: ast.AST) -> sp.Expr:
             return left * right
         if isinstance(node.op, ast.Div):
             if right == 0:
-                raise SafeParserError("División entre cero no permitida.")
+                raise SafeParserError("Division by zero is not allowed.")
             return left / right
         if isinstance(node.op, ast.Pow):
             return left ** right
 
-    raise SafeParserError(f"No se pudo procesar el nodo: {type(node).__name__}")
+    raise SafeParserError(f"Could not process node: {type(node).__name__}")
 
 
 def parse_expression(expr_str: str) -> sp.Expr:
-    """
-    Parsea de forma segura una expresión matemática a SymPy sin usar eval ni sympify no seguro.
-    """
+    "Parse a mathematical expression into SymPy without eval or unsafe sympify."
     cleaned = preprocess_input(expr_str)
     try:
         tree = ast.parse(cleaned, mode='eval')
     except SyntaxError as e:
-        raise SafeParserError(f"Error de sintaxis matemática: expresión mal formada ({e.msg}).")
+        raise SafeParserError(f"Mathematical syntax error: malformed expression ({e.msg}).")
 
     _check_ast_safety_and_depth(tree)
     return _ast_to_sympy(tree)
 
 
 def parse_equation(eq_str: str) -> Tuple[sp.Expr, sp.Expr, sp.Symbol]:
-    """
-    Parsea una ecuación con signo '=' (ej. '2x + 3 = 11').
-    Retorna (lhs_sympy, rhs_sympy, variable_principal).
-    """
+    "Parse an equation containing '=' (e.g. '2x + 3 = 11').\nReturn (lhs_sympy, rhs_sympy, main_variable)."
     if "=" not in eq_str:
-        raise SafeParserError("Una ecuación debe contener el signo '=' separando ambos miembros.")
+        raise SafeParserError("An equation must contain '=' between its two sides.")
 
     parts = eq_str.split("=")
     if len(parts) != 2:
-        raise SafeParserError("La ecuación debe contener exactamente un signo '='.")
+        raise SafeParserError("The equation must contain exactly one '=' sign.")
 
     lhs_str = parts[0].strip()
     rhs_str = parts[1].strip()
 
     if not lhs_str or not rhs_str:
-        raise SafeParserError("Ambos lados de la ecuación deben tener una expresión.")
+        raise SafeParserError("Both sides of the equation must contain an expression.")
 
     lhs = parse_expression(lhs_str)
     rhs = parse_expression(rhs_str)
 
-    # Identificar la incógnita
+    # Identify the unknown
     symbols = (lhs.free_symbols | rhs.free_symbols)
     if len(symbols) == 0:
-        # Ecuación sin incógnitas (ej: 2 = 2 o 2 = 3)
+        # Equation with no unknowns (e.g. 2 = 2 or 2 = 3)
         var = sp.Symbol("x", real=True)
     elif len(symbols) == 1:
         var = list(symbols)[0]
     else:
-        # En v0.1 solo soportamos una incógnita
-        raise SafeParserError(f"En la versión 0.1 solo se admiten ecuaciones con una incógnita. Se detectaron: {symbols}")
+        # Version 0.1 supports only one unknown
+        raise SafeParserError(f"Version 0.1 only supports equations with one unknown. Found: {symbols}")
 
     return lhs, rhs, var

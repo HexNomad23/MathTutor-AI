@@ -1,7 +1,4 @@
-"""
-Teclado matemático virtual para facilitar la entrada de expresiones.
-Inserta símbolos en el campo de texto activo sin requerir caracteres especiales del teclado.
-"""
+"Virtual mathematical keyboard for entering expressions.\nInserts symbols into the active input field without requiring special keyboard characters."
 
 from PySide6.QtWidgets import QWidget, QGridLayout, QPushButton, QLineEdit
 from PySide6.QtCore import Qt
@@ -18,7 +15,7 @@ class MathKeyboardWidget(QWidget):
         layout.setContentsMargins(0, 4, 0, 4)
         layout.setSpacing(4)
 
-        # Definición de botones (texto visual, texto a insertar)
+        # Button definitions (display text, inserted text)
         buttons = [
             ("x", "x"), ("+", " + "), ("−", " - "), ("·", "*"),
             ("÷", "/"), ("=", " = "), ("(", "("), (")", ")"),

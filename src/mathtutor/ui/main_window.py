@@ -1,13 +1,10 @@
-"""
-Ventana Principal de MathTutor AI (PySide6 / Qt).
-Diseñada con navegación lateral, responsive para 1366x768 y escalado de Windows.
-"""
+"Main MathTutor AI window (PySide6 / Qt).\nUses sidebar navigation with layouts for 1366x768 and Windows display scaling."
 
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QListWidget,
     QListWidgetItem, QStackedWidget, QLabel, QStatusBar, QFrame
 )
-from PySide6.QtCore import Qt, QSize
+from PySide6.QtCore import Qt, QSize, QLocale
 from PySide6.QtGui import QIcon, QFont
 
 from ..storage.database import StorageManager
@@ -21,9 +18,10 @@ from .views.settings_view import SettingsView
 
 class MainWindow(QMainWindow):
     def __init__(self, storage: StorageManager, parent=None):
+        QLocale.setDefault(QLocale(QLocale.Language.English, QLocale.Country.UnitedStates))
         super().__init__(parent)
         self.storage = storage
-        self.setWindowTitle("MathTutor AI — Versión 0.1")
+        self.setWindowTitle("MathTutor AI — Version 0.1")
         self.resize(1366, 768)
         self.setMinimumSize(960, 640)
         self._init_ui()
@@ -37,7 +35,7 @@ class MainWindow(QMainWindow):
         root_layout.setContentsMargins(0, 0, 0, 0)
         root_layout.setSpacing(0)
 
-        # Barra lateral de navegación
+        # Navigation sidebar
         sidebar = QFrame()
         sidebar.setFixedWidth(230)
         sidebar.setStyleSheet("""
@@ -50,16 +48,16 @@ class MainWindow(QMainWindow):
         side_layout.setContentsMargins(12, 18, 12, 14)
         side_layout.setSpacing(12)
 
-        # Logo / Marca
+        # Logo / brand
         brand_label = QLabel("MathTutor AI")
         brand_label.setStyleSheet("color: #ffffff; font-size: 20px; font-weight: bold; padding-left: 6px;")
         side_layout.addWidget(brand_label)
 
-        ver_label = QLabel("v0.1 • Modo Local")
+        ver_label = QLabel("v0.1 • Local Mode")
         ver_label.setStyleSheet("color: #38bdf8; font-size: 11px; font-weight: 600; padding-left: 6px; margin-bottom: 8px;")
         side_layout.addWidget(ver_label)
 
-        # Menú de navegación
+        # Navigation menu
         self.nav_list = QListWidget()
         self.nav_list.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.nav_list.setStyleSheet("""
@@ -87,12 +85,12 @@ class MainWindow(QMainWindow):
         """)
 
         nav_items = [
-            ("Inicio", "home"),
-            ("Resolver", "solver"),
-            ("Practicar", "practice"),
-            ("Mi progreso", "progress"),
-            ("Historial", "history"),
-            ("Ajustes", "settings"),
+            ("Home", "home"),
+            ("Solve", "solver"),
+            ("Practice", "practice"),
+            ("My Progress", "progress"),
+            ("History", "history"),
+            ("Settings", "settings"),
         ]
 
         for text, tag in nav_items:
@@ -105,18 +103,18 @@ class MainWindow(QMainWindow):
         side_layout.addWidget(self.nav_list)
         side_layout.addStretch()
 
-        # Perfil en la barra lateral
-        self.lbl_profile_sidebar = QLabel("👤 Estudiante")
+        # Sidebar profile
+        self.lbl_profile_sidebar = QLabel("👤 Student")
         self.lbl_profile_sidebar.setStyleSheet("color: #cbd5e1; font-size: 13px; font-weight: 600; padding: 6px;")
         side_layout.addWidget(self.lbl_profile_sidebar)
 
         root_layout.addWidget(sidebar)
 
-        # Contenedor apilado de vistas (QStackedWidget)
+        # Stacked view container (QStackedWidget)
         self.stack = QStackedWidget()
         self.stack.setStyleSheet("background-color: #f8fafc;")
 
-        # Vistas
+        # Views
         self.view_home = HomeView(self.storage)
         self.view_home.navigate_to.connect(self._handle_home_navigation)
         self.stack.addWidget(self.view_home)  # 0
@@ -140,7 +138,7 @@ class MainWindow(QMainWindow):
 
         root_layout.addWidget(self.stack, stretch=1)
 
-        # Barra de estado inferior
+        # Bottom status bar
         self.status_bar = QStatusBar()
         self.status_bar.setStyleSheet("background-color: #f1f5f9; color: #475569; font-size: 12px; border-top: 1px solid #e2e8f0;")
         self.setStatusBar(self.status_bar)
@@ -150,7 +148,7 @@ class MainWindow(QMainWindow):
 
     def _on_nav_changed(self, row: int):
         self.stack.setCurrentIndex(row)
-        # Refrescar datos en vistas que lo requieran
+        # Refresh data in views that need it
         if row == 0:
             self.view_home.refresh_data()
         elif row == 3:
@@ -162,7 +160,7 @@ class MainWindow(QMainWindow):
         if route.startswith("resolver_"):
             subject = route.replace("resolver_", "")
             self.nav_list.setCurrentRow(1)
-            # Cambiar a la pestaña correspondiente
+            # Switch to the corresponding tab
             sub_to_tab = {"algebra": 0, "geometria": 1, "fisica": 2, "calculo": 3}
             if subject in sub_to_tab:
                 self.view_solver.tabs.setCurrentIndex(sub_to_tab[subject])
@@ -183,12 +181,12 @@ class MainWindow(QMainWindow):
     def _update_status_bar(self):
         profile = self.storage.get_profile()
         self.lbl_profile_sidebar.setText(f"👤 {profile.name}")
-        self.status_bar.showMessage(f"Modo local activo (privado) | Perfil: {profile.name} | Listo")
+        self.status_bar.showMessage(f"Local mode active | Profile: {profile.name} | Ready")
 
     def _apply_global_styles(self):
         from PySide6.QtGui import QPalette, QColor
 
-        # Forzar paleta clara para que el Modo Oscuro de Windows no vuelva invisible el texto
+        # Force a light palette to keep text readable in Windows dark mode
         palette = QPalette()
         palette.setColor(QPalette.ColorRole.Window, QColor("#f8fafc"))
         palette.setColor(QPalette.ColorRole.WindowText, QColor("#0f172a"))

@@ -1,7 +1,4 @@
-"""
-Widget de visualización de gráficas de polinomios integrado en Qt mediante Matplotlib.
-Incluye ejes coordenados, cuadrícula y renderizado de escala.
-"""
+"Polynomial graph widget embedded in Qt using Matplotlib.\nIncludes coordinate axes, a grid, and labeled scales."
 
 from typing import Optional
 import numpy as np
@@ -14,7 +11,7 @@ from matplotlib.figure import Figure
 class PolynomialPlotWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.figure = Figure(figsize=(5, 3.5), dpi=100)
+        self.figure = Figure(figsize=(5, 3.5), dpi=100, layout="constrained")
         self.canvas = FigureCanvas(self.figure)
         self.ax = self.figure.add_subplot(111)
 
@@ -31,11 +28,11 @@ class PolynomialPlotWidget(QWidget):
         self.ax.spines['right'].set_color('none')
         self.ax.spines['top'].set_color('none')
         self.ax.grid(True, which='both', linestyle='--', alpha=0.5)
-        self.ax.set_title("Gráfica ilustrativa", fontsize=10, color='#475569')
+        self.ax.set_title("Illustrative Graph", fontsize=10, color='#475569')
         self.canvas.draw()
 
     def plot_polynomial(self, poly_expr: sp.Expr, var: sp.Symbol, x_min: float = -10, x_max: float = 10, title: Optional[str] = None):
-        """Grafica una función polinómica f(var) en el intervalo [x_min, x_max]."""
+        "Plot a polynomial f(var) over [x_min, x_max]."
         self.ax.clear()
         self.ax.spines['left'].set_position('zero')
         self.ax.spines['bottom'].set_position('zero')
@@ -43,12 +40,12 @@ class PolynomialPlotWidget(QWidget):
         self.ax.spines['top'].set_color('none')
         self.ax.grid(True, which='both', linestyle='--', alpha=0.5)
 
-        # Generar puntos numéricos seguros
+        # Generate numerical points
         x_vals = np.linspace(x_min, x_max, 400)
         try:
             f = sp.lambdify(var, poly_expr, modules=['numpy'])
             y_vals = f(x_vals)
-            # Manejar constantes
+            # Handle constant functions
             if np.isscalar(y_vals):
                 y_vals = np.full_like(x_vals, y_vals)
 
@@ -59,6 +56,6 @@ class PolynomialPlotWidget(QWidget):
                 self.ax.set_title(f"f({var}) = {poly_expr}", fontsize=10, color='#1e293b')
             self.ax.legend(loc="upper right", fontsize=9)
         except Exception:
-            self.ax.text(0.5, 0.5, "No se pudo generar la gráfica", horizontalalignment='center', verticalalignment='center')
+            self.ax.text(0.5, 0.5, "Could not generate the graph", horizontalalignment='center', verticalalignment='center')
 
         self.canvas.draw()

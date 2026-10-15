@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "mathtutor-ai"
 version = "0.1.0"
-description = "Tutor inteligente de matemáticas para escritorio (Windows)"
+description = "Desktop mathematics tutor with step-by-step explanations (Windows)"
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [

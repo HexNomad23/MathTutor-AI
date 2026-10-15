@@ -1,9 +1,4 @@
-"""
-Vista de Progreso Real del Estudiante (ProgressView).
-Muestra las estadísticas basadas exclusivamente en datos guardados en SQLite.
-Si no hay suficientes datos (< 3 intentos por tema), muestra:
-'Aún no hay suficientes ejercicios para valorar tu progreso'.
-"""
+"Student progress view.\nShows statistics based only on SQLite records.\nDisplays an insufficient-data message when a topic has fewer than three attempts."
 
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QGridLayout, QFrame, QPushButton
@@ -26,23 +21,23 @@ class ProgressView(QWidget):
         layout.setSpacing(16)
 
         header_layout = QHBoxLayout()
-        title = QLabel("Mi Progreso de Aprendizaje")
+        title = QLabel("My Learning Progress")
         title.setStyleSheet("font-size: 20px; font-weight: bold; color: #0f172a;")
         header_layout.addWidget(title)
 
         header_layout.addStretch()
 
-        btn_refresh = QPushButton("Actualizar estadísticas")
+        btn_refresh = QPushButton("Refresh Statistics")
         btn_refresh.clicked.connect(self.refresh_stats)
         header_layout.addWidget(btn_refresh)
 
         layout.addLayout(header_layout)
 
-        notice = QLabel("Las valoraciones se basan estrictamente en tus ejercicios reales resueltos y guardados en tu perfil local.")
+        notice = QLabel("Assessments are based only on your completed exercises saved in your local profile.")
         notice.setStyleSheet("color: #64748b; font-size: 13px;")
         layout.addWidget(notice)
 
-        # Contenedor de tarjetas por tema
+        # Topic card container
         self.grid_layout = QGridLayout()
         self.grid_layout.setSpacing(14)
         layout.addLayout(self.grid_layout)
@@ -52,18 +47,18 @@ class ProgressView(QWidget):
         self.refresh_stats()
 
     def refresh_stats(self):
-        # Limpiar grid
+        # Clear the grid
         while self.grid_layout.count() > 0:
             item = self.grid_layout.takeAt(0)
             if item.widget():
                 item.widget().deleteLater()
 
         topic_names = {
-            "algebra_lineal": "Álgebra Lineal",
-            "algebra_cuadratica": "Álgebra Cuadrática",
-            "geometria": "Geometría",
-            "fisica": "Física",
-            "calculo": "Cálculo",
+            "algebra_lineal": "Linear Equations",
+            "algebra_cuadratica": "Quadratic Equations",
+            "geometria": "Geometry",
+            "fisica": "Physics",
+            "calculo": "Calculus",
         }
 
         row, col = 0, 0
@@ -90,13 +85,13 @@ class ProgressView(QWidget):
         c_layout = QVBoxLayout(card)
         c_layout.setSpacing(8)
 
-        # Título y Nivel
+        # Title and level
         header_l = QHBoxLayout()
         t_lbl = QLabel(title)
         t_lbl.setStyleSheet("font-size: 15px; font-weight: bold; color: #1e3a8a;")
         header_l.addWidget(t_lbl)
 
-        lvl_badge = QLabel(f"Nivel actual: {summary['current_level']}")
+        lvl_badge = QLabel(f"Current level: {summary['current_level']}")
         lvl_badge.setStyleSheet("""
             background-color: #eff6ff;
             color: #2563eb;
@@ -115,15 +110,15 @@ class ProgressView(QWidget):
             msg_lbl.setStyleSheet("color: #94a3b8; font-style: italic; font-size: 13px; margin-top: 6px;")
             c_layout.addWidget(msg_lbl)
 
-            details_lbl = QLabel(f"Intentos registrados: {summary['total_attempts']} | Aciertos: {summary['total_correct']}")
+            details_lbl = QLabel(f"Recorded attempts: {summary['total_attempts']} | Correct: {summary['total_correct']}")
             details_lbl.setStyleSheet("color: #64748b; font-size: 12px;")
             c_layout.addWidget(details_lbl)
         else:
-            pct_lbl = QLabel(f"Precisión: {summary['percentage']}% ({summary['total_correct']} aciertos de {summary['total_attempts']} intentos)")
+            pct_lbl = QLabel(f"Accuracy: {summary['percentage']}% ({summary['total_correct']} correct out of {summary['total_attempts']} attempts)")
             pct_lbl.setStyleSheet("font-size: 14px; font-weight: 600; color: #166534;")
             c_layout.addWidget(pct_lbl)
 
-            blk_lbl = QLabel(f"Avance en bloque adaptativo: {summary.get('unassisted_progress', '0/5')}")
+            blk_lbl = QLabel(f"Adaptive block progress: {summary.get('unassisted_progress', '0/5')}")
             blk_lbl.setStyleSheet("color: #475569; font-size: 12px;")
             c_layout.addWidget(blk_lbl)
 

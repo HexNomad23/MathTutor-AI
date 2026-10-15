@@ -1,13 +1,10 @@
-"""
-Punto de entrada principal para MathTutor AI.
-Soporta ejecución como módulo (-m mathtutor.main) y ejecutable PyInstaller.
-"""
+"Main entry point for MathTutor AI.\nSupports module execution (-m mathtutor.main) and PyInstaller executables."
 
 import sys
 import os
 from pathlib import Path
 
-# Asegurar que el directorio src o el paquete estén en sys.path
+# Ensure the src or package directory is on sys.path
 current_dir = Path(__file__).resolve().parent
 if str(current_dir.parent) not in sys.path:
     sys.path.insert(0, str(current_dir.parent))

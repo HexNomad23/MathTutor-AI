@@ -1,17 +1,15 @@
-"""
-Vista de Inicio (HomeView).
-Muestra accesos directos a las cuatro materias, última actividad y recomendaciones basadas en el historial.
-"""
+"Home view.\nShows shortcuts to four subjects, recent activity, and history-based recommendations."
 
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QGridLayout, QFrame
 )
 from PySide6.QtCore import Qt, Signal
 from ...storage.database import StorageManager
+from ..labels import subject_name
 
 
 class HomeView(QWidget):
-    navigate_to = Signal(str)  # Señal para navegar a otra vista
+    navigate_to = Signal(str)  # Signal for navigation to another view
 
     def __init__(self, storage: StorageManager, parent=None):
         super().__init__(parent)
@@ -23,25 +21,25 @@ class HomeView(QWidget):
         layout.setContentsMargins(24, 24, 24, 24)
         layout.setSpacing(18)
 
-        # Saludo
+        # Greeting
         profile = self.storage.get_profile()
-        self.greeting_label = QLabel(f"¡Hola, {profile.name}!")
+        self.greeting_label = QLabel(f"Hello, {profile.name}!")
         self.greeting_label.setStyleSheet("font-size: 24px; font-weight: bold; color: #0f172a;")
         layout.addWidget(self.greeting_label)
 
-        subtitle = QLabel("Bienvenido a MathTutor AI. Selecciona una materia o continúa donde lo dejaste.")
+        subtitle = QLabel("Welcome to MathTutor AI. Choose a subject or pick up where you left off.")
         subtitle.setStyleSheet("font-size: 14px; color: #64748b;")
         layout.addWidget(subtitle)
 
-        # Tarjetas de Materias (Grid)
+        # Subject cards (grid)
         grid_layout = QGridLayout()
         grid_layout.setSpacing(14)
 
         subjects = [
-            ("Álgebra", "Ecuaciones lineales y cuadráticas, pasos y revisión.", "#2563eb", "algebra"),
-            ("Geometría", "Áreas, perímetros y Teorema de Pitágoras.", "#059669", "geometria"),
-            ("Física", "MRU, Segunda Ley de Newton y conversiones.", "#d97706", "fisica"),
-            ("Cálculo", "Derivadas e integrales de funciones polinómicas.", "#7c3aed", "calculo"),
+            ("Algebra", "Linear and quadratic equations, steps, and review.", "#2563eb", "algebra"),
+            ("Geometry", "Areas, perimeters, and the Pythagorean theorem.", "#059669", "geometria"),
+            ("Physics", "Uniform motion, Newton's second law, and conversions.", "#d97706", "fisica"),
+            ("Calculus", "Derivatives and integrals of polynomial functions.", "#7c3aed", "calculo"),
         ]
 
         row, col = 0, 0
@@ -63,7 +61,7 @@ class HomeView(QWidget):
             d_lbl.setWordWrap(True)
             d_lbl.setStyleSheet("font-size: 12px; color: #475569; margin-top: 4px;")
 
-            btn = QPushButton("Abrir materia ➔")
+            btn = QPushButton("Open Subject ➔")
             btn.setStyleSheet(f"""
                 QPushButton {{
                     background-color: #f8fafc;
@@ -93,34 +91,34 @@ class HomeView(QWidget):
 
         layout.addLayout(grid_layout)
 
-        # Panel inferior: Última actividad y Recomendación
+        # Bottom panel: recent activity and recommendation
         info_layout = QHBoxLayout()
         info_layout.setSpacing(14)
 
-        # Tarjeta Última Actividad
+        # Recent activity card
         self.activity_card = QFrame()
         self.activity_card.setStyleSheet("background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px;")
         act_layout = QVBoxLayout(self.activity_card)
-        act_title = QLabel("Última actividad")
+        act_title = QLabel("Recent Activity")
         act_title.setStyleSheet("font-weight: bold; font-size: 14px; color: #1e293b;")
         act_layout.addWidget(act_title)
 
-        self.act_desc = QLabel("Cargando actividad...")
+        self.act_desc = QLabel("Loading activity...")
         self.act_desc.setWordWrap(True)
         self.act_desc.setStyleSheet("font-size: 13px; color: #475569; margin-top: 6px;")
         act_layout.addWidget(self.act_desc)
         act_layout.addStretch()
         info_layout.addWidget(self.activity_card, stretch=1)
 
-        # Tarjeta Recomendación
+        # Recommendation card
         self.rec_card = QFrame()
         self.rec_card.setStyleSheet("background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px;")
         rec_layout = QVBoxLayout(self.rec_card)
-        rec_title = QLabel("Recomendación de estudio")
+        rec_title = QLabel("Study Recommendation")
         rec_title.setStyleSheet("font-weight: bold; font-size: 14px; color: #1e293b;")
         rec_layout.addWidget(rec_title)
 
-        self.rec_desc = QLabel("Cargando recomendación...")
+        self.rec_desc = QLabel("Loading recommendation...")
         self.rec_desc.setWordWrap(True)
         self.rec_desc.setStyleSheet("font-size: 13px; color: #475569; margin-top: 6px;")
         rec_layout.addWidget(self.rec_desc)
@@ -134,21 +132,21 @@ class HomeView(QWidget):
 
     def refresh_data(self):
         profile = self.storage.get_profile()
-        self.greeting_label.setText(f"¡Hola, {profile.name}!")
+        self.greeting_label.setText(f"Hello, {profile.name}!")
 
         history = self.storage.get_history(limit=1)
         if history:
             last = history[0]
             self.act_desc.setText(
-                f"Materia: {last['subject'].capitalize()}\n"
-                f"Ejercicio: {last['original_input']}\n"
-                f"Resultado: {last['final_answer']}\n"
-                f"Fecha: {last['created_at']}"
+                f"Subject: {subject_name(last['subject'])}\n"
+                f"Exercise: {last['original_input']}\n"
+                f"Result: {last['final_answer']}\n"
+                f"Date: {last['created_at']}"
             )
             self.rec_desc.setText(
-                f"Has trabajado recientemente en {last['subject']}. "
-                f"Te recomendamos practicar ejercicios similares en la sección 'Practicar'."
+                f"You recently worked on {subject_name(last['subject'])}. "
+                f"Try similar exercises in the Practice section."
             )
         else:
-            self.act_desc.setText("Aún no has resuelto ningún ejercicio. ¡Comienza ahora ingresando uno en 'Resolver'!")
-            self.rec_desc.setText("Aún no hay suficientes ejercicios en tu historial para generar recomendaciones personalizadas.")
+            self.act_desc.setText("You have not solved any exercises yet. Get started in the Solve section!")
+            self.rec_desc.setText("There are not enough exercises in your history for personalized recommendations yet.")

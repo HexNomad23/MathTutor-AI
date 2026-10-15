@@ -1,4 +1,4 @@
-# Entornos y paquetes instalados (se reconstruyen con pip)
+# Virtual environments and installed packages (recreated with pip)
 .venv/
 venv/
 env/
@@ -7,7 +7,7 @@ __pycache__/
 *.egg-info/
 .eggs/
 
-# Compilaciones y resultados de pruebas
+# Build and test output
 build/
 dist/
 .pytest_cache/
@@ -18,7 +18,7 @@ coverage.xml
 .mypy_cache/
 .ruff_cache/
 
-# Datos de uso locales y credenciales
+# Local usage data and credentials
 *.db
 *.db-*
 *.sqlite
@@ -30,7 +30,7 @@ coverage.xml
 *.pem
 *.key
 
-# Registros y archivos propios del equipo
+# Logs and machine-specific files
 *.log
 *.lnk
 Thumbs.db
@@ -39,4 +39,4 @@ Desktop.ini
 .idea/
 .vscode/
 
-# Se conservan las capturas PNG, el .spec portable y la documentación.
+# Keep PNG screenshots, the portable .spec, and documentation.

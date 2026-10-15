@@ -1,6 +1,4 @@
-"""
-Pruebas para los motores de Geometría, Física y Cálculo según la tabla 11 del mandato.
-"""
+"Geometry, physics, and calculus engine tests from acceptance table 11."
 
 import pytest
 from mathtutor.math_engine.geometry_solver import (
@@ -23,7 +21,7 @@ from mathtutor.math_engine.calculus_solver import (
 def test_geometry_pythagoras_3_4_5():
     sol = solve_pythagoras(a=3, b=4, c=None, unit="cm")
     assert "5" in sol.final_answer
-    assert "Hipotenusa" in sol.final_answer
+    assert "Hypotenuse" in sol.final_answer
 
 
 def test_geometry_triangle_area():
@@ -37,7 +35,7 @@ def test_geometry_invalid_dimensions():
         solve_triangle_area(base=-5, height=10)
 
     with pytest.raises(ValueError):
-        # Hipotenusa menor que el cateto
+        # Hypotenuse shorter than a leg
         solve_pythagoras(a=10, b=None, c=5)
 
 
@@ -61,7 +59,7 @@ def test_physics_conversion_72_kmh():
 
 def test_physics_invalid_data():
     with pytest.raises(ValueError):
-        solve_mru(d=100, v=None, t=0)  # División entre cero
+        solve_mru(d=100, v=None, t=0)  # Division by zero
 
 
 def test_calculus_derivative_3x2_plus_2x_minus_5():

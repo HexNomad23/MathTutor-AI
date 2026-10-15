@@ -1,7 +1,4 @@
-"""
-Script de compilación portable para Windows usando PyInstaller.
-Genera la carpeta portable dist/MathTutorAI/ con MathTutorAI.exe y sus dependencias.
-"""
+"Build a portable Windows distribution with PyInstaller.\nCreates dist/MathTutorAI/ with MathTutorAI.exe and its dependencies."
 
 import sys
 import subprocess
@@ -27,14 +24,14 @@ def build():
         str(entry_point)
     ]
 
-    print("Ejecutando PyInstaller:", " ".join(cmd))
+    print("Running PyInstaller:", " ".join(cmd))
     res = subprocess.run(cmd, cwd=project_root)
     if res.returncode == 0:
-        print("\n[OK] Compilacion exitosa!")
-        print(f"Carpeta portable generada en: {dist_dir / 'MathTutorAI'}")
-        print(f"Ejecutable: {dist_dir / 'MathTutorAI' / 'MathTutorAI.exe'}")
+        print("\n[OK] Build completed successfully!")
+        print(f"Portable distribution created at: {dist_dir / 'MathTutorAI'}")
+        print(f"Executable: {dist_dir / 'MathTutorAI' / 'MathTutorAI.exe'}")
     else:
-        print("\n[ERROR] Error durante la compilacion de PyInstaller.")
+        print("\n[ERROR] PyInstaller build failed.")
         sys.exit(res.returncode)
 
 

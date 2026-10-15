@@ -1,6 +1,4 @@
-"""
-Modelos de datos compartidos para MathTutor AI.
-"""
+"Shared data models for MathTutor AI."
 
 from dataclasses import dataclass, field
 from enum import Enum
@@ -17,10 +15,10 @@ class Subject(str, Enum):
 
 
 class VerificationStatus(str, Enum):
-    VERIFIED = "Verificado"
-    NUMERICAL_CHECK = "Comprobación numérica"
-    CANNOT_VERIFY = "No se pudo verificar"
-    OUT_OF_SCOPE = "Fuera del alcance"
+    VERIFIED = "Verified"
+    NUMERICAL_CHECK = "Numerical check"
+    CANNOT_VERIFY = "Could not verify"
+    OUT_OF_SCOPE = "Out of scope"
 
 
 @dataclass
@@ -67,6 +65,6 @@ class StudentAttempt:
 @dataclass
 class UserProfile:
     id: str = "default_student"
-    name: str = "Estudiante"
+    name: str = "Student"
     created_at: datetime.datetime = field(default_factory=datetime.datetime.now)
     preferences: Dict[str, Any] = field(default_factory=dict)

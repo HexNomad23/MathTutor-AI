@@ -1,8 +1,4 @@
-"""
-Widget de tarjeta de paso pedagógico (StepCard).
-Muestra la operación realizada, la expresión resultante y la explicación
-con alternador entre modo 'Breve' y 'Detallado'.
-"""
+"Educational step card widget.\nShows the operation, resulting expression, and explanation with brief and detailed modes."
 
 from PySide6.QtWidgets import (
     QFrame, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QSizePolicy
@@ -34,15 +30,15 @@ class StepCardWidget(QFrame):
         layout.setContentsMargins(12, 10, 12, 10)
         layout.setSpacing(6)
 
-        # Encabezado: Paso X y Botón Breve/Detallado
+        # Header: step number and brief/detail button
         header_layout = QHBoxLayout()
         header_layout.setContentsMargins(0, 0, 0, 0)
 
-        step_title = QLabel(f"Paso {self.step.step_number}: {self.step.operation}")
+        step_title = QLabel(f"Step {self.step.step_number}: {self.step.operation}")
         step_title.setStyleSheet("font-weight: bold; font-size: 14px; color: #1e3a8a;")
         header_layout.addWidget(step_title, stretch=1)
 
-        self.toggle_btn = QPushButton("Detalle ▼" if not self.is_detailed else "Breve ▲")
+        self.toggle_btn = QPushButton("Details ▼" if not self.is_detailed else "Brief ▲")
         self.toggle_btn.setFixedWidth(80)
         self.toggle_btn.setStyleSheet("""
             QPushButton {
@@ -62,7 +58,7 @@ class StepCardWidget(QFrame):
         header_layout.addWidget(self.toggle_btn)
         layout.addLayout(header_layout)
 
-        # Expresión resultante destacada
+        # Highlighted resulting expression
         res_label = QLabel(f"➔  {self.step.resulting_expr}")
         res_label.setStyleSheet("""
             background-color: #f8fafc;
@@ -76,7 +72,7 @@ class StepCardWidget(QFrame):
         """)
         layout.addWidget(res_label)
 
-        # Explicación
+        # Explanation
         self.explanation_label = QLabel(
             self.step.explanation_detailed if self.is_detailed else self.step.explanation_brief
         )
@@ -84,24 +80,24 @@ class StepCardWidget(QFrame):
         self.explanation_label.setStyleSheet("color: #475569; font-size: 13px; line-height: 1.4;")
         layout.addWidget(self.explanation_label)
 
-        # Restricciones si las hay
+        # Restrictions, if any
         if self.step.restrictions:
-            rest_label = QLabel(f"Restricciones: {self.step.restrictions}")
+            rest_label = QLabel(f"Restrictions: {self.step.restrictions}")
             rest_label.setStyleSheet("color: #b45309; font-size: 12px; font-style: italic;")
             layout.addWidget(rest_label)
 
     def _toggle_detail(self):
         self.is_detailed = not self.is_detailed
         if self.is_detailed:
-            self.toggle_btn.setText("Breve ▲")
+            self.toggle_btn.setText("Brief ▲")
             self.explanation_label.setText(self.step.explanation_detailed)
         else:
-            self.toggle_btn.setText("Detalle ▼")
+            self.toggle_btn.setText("Details ▼")
             self.explanation_label.setText(self.step.explanation_brief)
 
     def set_detailed_mode(self, detailed: bool):
         self.is_detailed = detailed
-        self.toggle_btn.setText("Breve ▲" if detailed else "Detalle ▼")
+        self.toggle_btn.setText("Brief ▲" if detailed else "Details ▼")
         self.explanation_label.setText(
             self.step.explanation_detailed if detailed else self.step.explanation_brief
         )
