@@ -1,0 +1,2 @@
+# Incluye las dependencias de ejecución, pytest y PyInstaller.
+-e .[dev]

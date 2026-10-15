@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mathtutor-ai"
+version = "0.1.0"
+description = "Tutor inteligente de matemáticas para escritorio (Windows)"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    { name = "MathTutor AI Team" }
+]
+dependencies = [
+    "PySide6>=6.5.0",
+    "sympy>=1.12",
+    "matplotlib>=3.8.0",
+    "numpy>=1.23.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pyinstaller>=6.0.0",
+]
+
+[project.scripts]
+mathtutor = "mathtutor.main:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
